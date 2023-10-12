@@ -22,7 +22,7 @@ class UnigeIE(InfoExtractor):
     _VALID_URL = r'https://mediaserver.unige.ch/play/(?P<id>\d+)'
     _TESTS = [{
         'url': 'https://mediaserver.unige.ch/play/196613',
-        'md5': 'cd2801394afc164e9775db6a140b91fe',
+        'md5': 'xxxx',
         'info_dict': {
             'id': '196613',
             'display_id': '196613',
@@ -97,3 +97,19 @@ class UnigeIE(InfoExtractor):
             'title': '', #title,
             # TODO more properties (see youtube_dl/extractor/common.py)
         }
+
+
+
+class UnigePlaylistIE(InfoExtractor):
+    _VALID_URL = r'https://mediaserver.unige.ch/collection/(?P<id>[-\w+]+)'
+
+    def _real_extract(self, url):
+        collection_id = self._match_id(url)
+
+        rss = self._download_xml(url + '.rss', collection_id)
+
+        entries = [self.url_result(video.text, 'Unige')
+                   for video in rss.findall('./channel/item/link')]
+        title_text = rss.find('./channel/title').text
+
+        return self.playlist_result(entries, collection_id, title_text)
