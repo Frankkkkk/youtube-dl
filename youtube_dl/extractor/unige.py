@@ -21,30 +21,15 @@ from youtube_dl.compat import (
 class UnigeIE(InfoExtractor):
     _VALID_URL = r'https://mediaserver.unige.ch/play/(?P<id>\d+)'
     _TESTS = [{
-        'url': 'http://www.vidio.com/watch/165683-dj_ambred-booyah-live-2015',
+        'url': 'https://mediaserver.unige.ch/play/196613',
         'md5': 'cd2801394afc164e9775db6a140b91fe',
         'info_dict': {
-            'id': '165683',
-            'display_id': 'dj_ambred-booyah-live-2015',
+            'id': '196613',
+            'display_id': '196613',
             'ext': 'mp4',
-            'title': 'DJ_AMBRED - Booyah (Live 2015)',
-            'description': 'md5:27dc15f819b6a78a626490881adbadf8',
-            'thumbnail': r're:^https?://.*\.jpg$',
-            'duration': 149,
-            'like_count': int,
-            'uploader': 'TWELVE Pic',
-            'timestamp': 1444902800,
-            'upload_date': '20151015',
-            'uploader_id': 'twelvepictures',
-            'channel': 'Cover Music Video',
-            'channel_id': '280236',
-            'view_count': int,
-            'dislike_count': int,
-            'comment_count': int,
-            'tags': 'count:4',
         },
     }, {
-        'url': 'https://www.vidio.com/watch/77949-south-korea-test-fires-missile-that-can-strike-all-of-the-north',
+        'url': 'https://mediaserver.unige.ch/proxy/196613/VN3-2569-2023-2024-09-19.mp4',
         'only_matching': True,
     }]
 
@@ -87,7 +72,11 @@ class UnigeIE(InfoExtractor):
             secure_wp = f'https://mediaserver.unige.ch/proxy/{video_id}/secure.php?view=play&id={video_id}'
             data = self._download_webpage(secure_wp, f'secure_{video_id}')
         except ExtractorError as e:
-            self._login(video_id)
+            if isinstance(e.cause, compat_HTTPError) and e.cause.code == 401:
+                self._login(video_id)
+            else:
+                # The video doesn't require login
+                pass
 
         # TODO more code goes here, for example ...
         #title = self._html_search_regex(r'<title>(.+?)</title>', webpage, 'title')
@@ -96,9 +85,15 @@ class UnigeIE(InfoExtractor):
         video_url = self._search_regex(
             r'<source src="([^"]+)"', webpage, 'video URL')
 
+
+
+        #title = self._html_search_regex(r'<title>(.+?)</title>', webpage, 'title', default=None).split('-')[0]
+
+
         return {
             'id': video_id,
             'title': f'My video {video_id}', #title,
             'url': video_url,
+            'title': '', #title,
             # TODO more properties (see youtube_dl/extractor/common.py)
         }
