@@ -1427,6 +1427,7 @@ from .ufctv import (
     UFCTVIE,
     UFCArabiaIE,
 )
+from .unige import UnigeIE
 from .uktvplay import UKTVPlayIE
 from .digiteka import DigitekaIE
 from .dlive import (
